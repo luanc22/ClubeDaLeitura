@@ -13,11 +13,11 @@
 
 =========================
 
-[WIP] Para cada Empréstimo cadastram-se: 
-• o amigo que pegou a revista [WIP]
-• qual foi a revista emprestada [WIP]
-• a data do empréstimo [WIP]
-• a data de devolução [WIP]
+[OK] Para cada Empréstimo cadastram-se: 
+• o amigo que pegou a revista [OK]
+• qual foi a revista emprestada [OK]
+• a data do empréstimo [OK]
+• a data de devolução [OK]
 • Cada criança só pode pegar uma revista por empréstimo. [OK]
 
 =========================
@@ -30,7 +30,7 @@
 
 =========================
 
-[WIP] Mensalmente Gustavo verifica os empréstimos realizados no mês e diariamente 
+[OK] Mensalmente Gustavo verifica os empréstimos realizados no mês e diariamente 
 
 */
 
@@ -43,12 +43,15 @@ namespace ClubeDaLeitura.ConsoleApp
             Revista[] listaDeRevista = new Revista[100];
             Caixa[] listaDeCaixa = new Caixa[100];
             Amigo[] listaDeAmigo = new Amigo[100];
+            Emprestimo[] listaDeEmprestimo = new Emprestimo[100];
+            Emprestimo[] emprestimosFeitos = new Emprestimo[100];
             Notificacao notificacao = new Notificacao();
             Menu menu = new Menu();
 
             int quantidadeDeCaixas = 0;
             int quantidadeDeRevistas = 0;
             int quantidadeDeAmigos = 0;
+            int quantidadeDeEmprestimos = 0;
             int opcaoEscolhida = 0;
 
             bool fecharApp = false;
@@ -128,7 +131,39 @@ namespace ClubeDaLeitura.ConsoleApp
                             notificacao.ApresentarMensagem(ConsoleColor.Red, "Opcao invalida, digite uma opcao valida!");
                         }
                         break;
+                    #endregion
+                    case 4:
+                        #region Menu Emprestimo. [OK]
+                        Console.Clear();
+                        Cabecalho();
+                        opcaoEscolhida = menu.ChamarMenuEmprestimo();
+                        if (opcaoEscolhida == 1)
+                        {
+                            Console.Clear();
+                            Cabecalho();
+                            CadastrarEmprestimo(listaDeAmigo, listaDeRevista, listaDeEmprestimo, ref quantidadeDeEmprestimos);
+                        }
+                        else if (opcaoEscolhida == 2)
+                        {
+                            Console.Clear();
+                            Cabecalho();
+                            CadastrarDevolucao(listaDeEmprestimo, emprestimosFeitos);
+                        }
+                        else if (opcaoEscolhida == 3)
+                        {
+                            Console.Clear();
+                            Cabecalho();
+                            ListarEmprestimosAberto(listaDeEmprestimo);
+                        }
+                        else if (opcaoEscolhida == 4)
+                        {
+                            Console.Clear();
+                            Cabecalho();
+                            ListarEmprestimosDoMes(listaDeEmprestimo);
+                        }
                         #endregion
+                        break;
+
                 }
             }
 
@@ -255,9 +290,11 @@ namespace ClubeDaLeitura.ConsoleApp
                 }
             }
 
+            numeroDaCaixa = numeroDaCaixa + 1;
+
             for (int i = 0; i <= contador; i++)
             {
-                if (listaDeCaixa[i].numero == numeroDaCaixa - 1)
+                if (listaDeCaixa[i].numero == numeroDaCaixa)
                 {
                     revista1.caixaArmazenada = listaDeCaixa[i];
                     int espacoVazioCaixas = listaDeCaixa[i].obterPosicaoVaziaRevista();
@@ -336,8 +373,6 @@ namespace ClubeDaLeitura.ConsoleApp
             Console.Clear();
             Cabecalho();
 
-            ListarRevistas(listaDeRevista);
-
             Console.WriteLine();
             Console.WriteLine("======== Registro de Amigo ========");
 
@@ -371,6 +406,163 @@ namespace ClubeDaLeitura.ConsoleApp
             #endregion
         }
 
+        static void CadastrarEmprestimo(Amigo[] listaDeAmigo, Revista[] listaDeRevista, Emprestimo[] listaDeEmprestimo, ref int quantidadeDeEmprestimos)
+        {
+            Emprestimo emprestimo1 = new Emprestimo();
+            Notificacao notificacao = new Notificacao();
+
+            bool validaAmigo = false;
+            string emprestimoEmString = "";
+
+            ListarAmigos(listaDeAmigo);
+
+            #region Coletar dados sobre a revista e armazenar. [OK]
+
+            while (validaAmigo == false)
+            {
+                Console.WriteLine();
+                Console.Write("Digite o nome do amigo do emprestimo: ");
+                emprestimoEmString = Console.ReadLine();
+
+                for (int i = 0; i < listaDeAmigo.Length; i++)
+                {
+                    if(i == listaDeAmigo.Length - 1)
+                    {
+                        notificacao.ApresentarMensagem(ConsoleColor.Red, "Amigo inexistente, por favor, realize o cadastro primeiro.");
+                        return;
+                    }
+                    else if (listaDeAmigo[i] != null && emprestimoEmString == listaDeAmigo[i].nome)
+                    {
+                        emprestimo1.amigo = listaDeAmigo[i];
+                        validaAmigo = true;
+                        break;
+                    }
+                }
+            }
+
+            for (int i = 0; i < listaDeEmprestimo.Length; i++)
+            {
+                if (listaDeEmprestimo[i] != null && listaDeEmprestimo[i].amigo.nome == emprestimoEmString)
+                {
+                    validaAmigo = false;
+                    notificacao.ApresentarMensagem(ConsoleColor.Red, "ERRO! Amigo ja possui um emprestimo.");
+                    return;
+                }
+            }
+
+            while (validaAmigo == true)
+            {
+
+                bool validaRevista = false;
+
+                while (validaRevista == false)
+                {
+                    Console.WriteLine();
+                    Console.Write("Digite o id da revista emprestada: ");
+                    string idEmprestimoRevistaEmString = Console.ReadLine();
+
+                    bool idEmprestimoValido = int.TryParse(idEmprestimoRevistaEmString, out int idEmprestimoRevista);
+
+                    if (idEmprestimoValido == false)
+                    {
+                        notificacao.ApresentarMensagem(ConsoleColor.Red, "Dados incorretos, por favor, insira apenas numeros.");
+                        continue;
+                    }
+
+                    for (int i = 0; i < listaDeEmprestimo.Length; i++)
+                    {
+                        if (listaDeEmprestimo[i] != null && listaDeEmprestimo[i].revista.idRevista == idEmprestimoRevista)
+                        {
+                            notificacao.ApresentarMensagem(ConsoleColor.Red, "ERRO! Revista ja esta em um emprestimo.");
+                            return;
+                        }
+                    }
+
+                    for (int i = 0; i < listaDeRevista.Length; i++)
+                    {
+                        if (listaDeRevista[i] != null && idEmprestimoRevista == listaDeRevista[i].idRevista)
+                        {
+                            emprestimo1.revista = listaDeRevista[i];
+                            validaRevista = true;
+                            break;
+                        }
+                    }
+                }
+
+                DateTime dataEmprestimo;
+                bool dataEmprestimoValida = false;
+
+                while (dataEmprestimoValida == false)
+                {
+                    Console.WriteLine();
+                    Console.Write("Digite a data de emprestimo da revista: ");
+                    string datadeEmprestimo = Console.ReadLine();
+                    dataEmprestimoValida = DateTime.TryParse(datadeEmprestimo, out dataEmprestimo);
+
+                    if (dataEmprestimoValida == true)
+                    {
+                        emprestimo1.dataEmprestimo = dataEmprestimo;
+                    }
+
+                }
+
+                DateTime dataDevolucao;
+                bool dataDevolucaoValida = false;
+
+                while (dataDevolucaoValida == false)
+                {
+                    Console.WriteLine();
+                    Console.Write("Digite a data de devolução: ");
+                    string dataDeDevolucao = Console.ReadLine();
+                    dataDevolucaoValida = DateTime.TryParse(dataDeDevolucao, out dataDevolucao);
+
+                    if (dataDevolucaoValida == true)
+                    {
+                        emprestimo1.dataDevolucao = dataDevolucao;
+                    }
+
+                }
+
+                Console.WriteLine();
+
+                #endregion
+
+                #region Guardar os dados da revista e incrementar a array. [OK]
+
+                listaDeEmprestimo[quantidadeDeEmprestimos] = emprestimo1;
+                quantidadeDeEmprestimos++;
+
+                #endregion
+
+                break;
+            }
+        }
+
+        static void CadastrarDevolucao(Emprestimo[] listaDeEmprestimo, Emprestimo[] EmprestimosFeitos)
+        {
+            #region Coletar dados sobre o amigo a devolver. [OK]
+
+            Console.WriteLine();
+            Console.Write("Digite o nome do amigo da devolucao: ");
+            string nomeDevolucao = Console.ReadLine();
+
+            int j = 0;
+
+            for (int i = 0; i < listaDeEmprestimo.Length; i++)
+            {
+                if (listaDeEmprestimo[i] != null && listaDeEmprestimo[i].amigo.nome != nomeDevolucao)
+                {
+                    EmprestimosFeitos[j] = listaDeEmprestimo[i];
+
+                    j++;
+                    break;
+                }
+            }
+
+            listaDeEmprestimo = EmprestimosFeitos;
+
+            #endregion
+        }
         #endregion
 
         #region Metodos de Listagem. [OK]
@@ -447,7 +639,6 @@ namespace ClubeDaLeitura.ConsoleApp
 
             for (int i = 0; i <= contador; i++)
             {
-                //Ver isso amanha
                 Console.Write("{0, -10} | {1, -55} | {2, -35}", listaDeRevista[i].idRevista, listaDeRevista[i].tipoColecao, listaDeRevista[i].caixaArmazenada.numero);
                 Console.WriteLine();
             }
@@ -500,6 +691,135 @@ namespace ClubeDaLeitura.ConsoleApp
             Console.WriteLine("======================================");
 
             #endregion
+        }
+
+        static void ListarEmprestimosAberto(Emprestimo[] listaDeEmprestimo)
+        {
+            Notificacao notificacao = new Notificacao();
+
+            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("=================== Emprestimos em Aberto ===================");
+            Console.ResetColor();
+
+            for (int i = 0; i < listaDeEmprestimo.Length; i++)
+            {
+                if (listaDeEmprestimo[i] == null)
+                {
+                    continue;
+                }
+                else
+                {
+                    if (listaDeEmprestimo[i].dataDevolucao >= DateTime.Today)
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine("===================================");
+                        Console.WriteLine();
+                        Console.WriteLine("====== Amigo ======");
+                        Console.WriteLine();
+                        Console.WriteLine("Nome: " + listaDeEmprestimo[i].amigo.nome);
+                        Console.WriteLine("Nome do responsavel: " + listaDeEmprestimo[i].amigo.nomeResponsavel);
+                        Console.WriteLine("Telefone: " + listaDeEmprestimo[i].amigo.telefone);
+                        Console.WriteLine("Endereco: " + listaDeEmprestimo[i].amigo.endereco);
+                        Console.WriteLine();
+                        Console.WriteLine("====== Revista ======");
+                        Console.WriteLine();
+                        Console.WriteLine("Tipo de colecao da revista: " + listaDeEmprestimo[i].revista.tipoColecao);
+                        Console.WriteLine("Numero de edicao da revista: " + listaDeEmprestimo[i].revista.numeroEdicao);
+                        Console.WriteLine("Ano da revista: " + listaDeEmprestimo[i].revista.anoRevista);
+                        Console.WriteLine("Numero da caixa da revista: " + listaDeEmprestimo[i].revista.caixaArmazenada.numero);
+                        Console.WriteLine();
+                        Console.WriteLine("====== Datas ======");
+                        Console.WriteLine();
+                        Console.WriteLine("Data do emprestimo: " + listaDeEmprestimo[i].dataEmprestimo);
+                        Console.WriteLine("Data de devolucao: " + listaDeEmprestimo[i].dataDevolucao);
+                        Console.WriteLine();
+                        Console.WriteLine("===================================");
+                        Console.WriteLine();
+                    }
+                }
+            }
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("=============================================================");
+            Console.ResetColor();
+
+            notificacao.ApresentarMensagem(ConsoleColor.Yellow, "Emprestimos Abertos Carregados com sucessso.");
+        }
+
+        static void ListarEmprestimosDoMes(Emprestimo[] listaDeEmprestimo)
+        {
+            Notificacao notificacao = new Notificacao();
+
+            int mes = 0;
+            bool numeroValido = false;
+            while (numeroValido == false)
+            {
+                Console.Write("Digite o mes a verificar: ");
+                string mesEmString = Console.ReadLine();
+                Console.WriteLine();
+
+                numeroValido = int.TryParse(mesEmString, out mes);
+
+                if (numeroValido == false)
+                {
+                    notificacao.ApresentarMensagem(ConsoleColor.Red, "Dados incorretos, por favor, insira apenas numeros.");
+                    continue;
+                }
+                else
+                {
+                    numeroValido = true;
+                }
+            }
+
+            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("=================== Emprestimos Mes {0} ===================", mes);
+            Console.ResetColor();
+
+            for (int i = 0; i < listaDeEmprestimo.Length; i++)
+            {
+                if (listaDeEmprestimo[i] == null)
+                {
+                    continue;
+                }
+                else
+                {
+                    if (listaDeEmprestimo[i].dataEmprestimo.Month == mes)
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine("===================================");
+                        Console.WriteLine();
+                        Console.WriteLine("====== Amigo ======");
+                        Console.WriteLine();
+                        Console.WriteLine("Nome: " + listaDeEmprestimo[i].amigo.nome);
+                        Console.WriteLine("Nome do responsavel: " + listaDeEmprestimo[i].amigo.nomeResponsavel);
+                        Console.WriteLine("Telefone: " + listaDeEmprestimo[i].amigo.telefone);
+                        Console.WriteLine("Endereco: " + listaDeEmprestimo[i].amigo.endereco);
+                        Console.WriteLine();
+                        Console.WriteLine("====== Revista ======");
+                        Console.WriteLine();
+                        Console.WriteLine("Tipo de colecao da revista: " + listaDeEmprestimo[i].revista.tipoColecao);
+                        Console.WriteLine("Numero de edicao da revista: " + listaDeEmprestimo[i].revista.numeroEdicao);
+                        Console.WriteLine("Ano da revista: " + listaDeEmprestimo[i].revista.anoRevista);
+                        Console.WriteLine("Numero da caixa da revista: " + listaDeEmprestimo[i].revista.caixaArmazenada.numero);
+                        Console.WriteLine();
+                        Console.WriteLine("====== Datas ======");
+                        Console.WriteLine();
+                        Console.WriteLine("Data do emprestimo: " + listaDeEmprestimo[i].dataEmprestimo);
+                        Console.WriteLine("Data de devolucao: " + listaDeEmprestimo[i].dataDevolucao);
+                        Console.WriteLine();
+                        Console.WriteLine("===================================");
+                        Console.WriteLine();
+                    }
+                }
+            }
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("===========================================================");
+            Console.ResetColor();
+
+            notificacao.ApresentarMensagem(ConsoleColor.Yellow, "Emprestimos Abertos Carregados com sucessso.");
         }
 
         #endregion
