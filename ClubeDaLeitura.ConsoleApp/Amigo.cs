@@ -8,10 +8,17 @@ namespace ClubeDaLeitura.ConsoleApp
 {
     public class Amigo
     {
-        public int id;
+        static int id;
+        public int idAmigo;
         public string nome;
         public string nomeResponsavel;
         public string telefone;
         public string endereco;
+
+        public Amigo()
+        {
+            id++;
+            idAmigo = id;
+        }
     }
 }

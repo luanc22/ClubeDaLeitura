@@ -10,7 +10,7 @@ namespace ClubeDaLeitura.ConsoleApp
     {
         public Amigo amigo;
         public Revista revista;
-        public Data dataEmprestimo;
-        public Data dataEvolucao;
+        public string dataEmprestimo;
+        public string dataDevolucao;
     }
 }
